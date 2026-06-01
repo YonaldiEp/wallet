@@ -131,7 +131,8 @@ export const centralBankService = {
       available_balance: wallet.available_balance,
       hold_balance: wallet.hold_balance,
       daily_transaction_count: wallet.daily_transaction_count,
-      daily_limit_count: wallet.daily_limit_count
+      daily_limit_count: wallet.daily_limit_count,
+      last_transaction_at: wallet.last_transaction_at
     };
   },
 
@@ -597,6 +598,38 @@ export const centralBankService = {
       fee_total: 0,
       tax_total: 0,
       note: 'Klaim Stimulus Mingguan',
+      created_at: new Date().toISOString(),
+      settled_at: new Date().toISOString()
+    };
+    cbState.transactions.push(tx);
+    return tx;
+  },
+
+  // 11. SUBSCRIBE INSIGHT (10.000)
+  subscribeInsight: async (walletId) => {
+    const wallet = cbState.wallets[walletId];
+    if (!wallet) throw new CustomError('NOT_FOUND', 'Wallet tidak ditemukan', 404);
+
+    const subscriptionAmount = 10000;
+    if (wallet.available_balance < subscriptionAmount) {
+      throw new CustomError('INSUFFICIENT_BALANCE', `Saldo tidak mencukupi untuk berlangganan UMKM Insight. Saldo Anda: ${wallet.available_balance}. Diperlukan: ${subscriptionAmount}`, 400);
+    }
+
+    wallet.available_balance -= subscriptionAmount;
+    cbState.wallets["wal_system_reserve"].available_balance += subscriptionAmount;
+
+    const tx = {
+      id: `trx_sub_${crypto.randomBytes(8).toString('hex')}`,
+      transaction_type: 'FEE',
+      status: 'SETTLED',
+      source_app: 'UMKM_INSIGHT',
+      payer_wallet_id: walletId,
+      payee_wallet_id: 'wal_system_reserve',
+      gross_amount: subscriptionAmount,
+      total_debit: subscriptionAmount,
+      fee_total: 0,
+      tax_total: 0,
+      note: 'Berlangganan Premium UMKM Insight',
       created_at: new Date().toISOString(),
       settled_at: new Date().toISOString()
     };

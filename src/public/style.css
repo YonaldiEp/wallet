@@ -1481,3 +1481,373 @@ select.select-input:focus {
   }
 }
 
+/* ================= ADDED PREMIUM CBDC AUDIT & INTERACTION STYLES ================= */
+.tx-card {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tx-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 75, 255, 0.04);
+}
+
+.ledger-audit-box {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 12px;
+  border: 1px dashed var(--surface-border);
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  animation: slideInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+}
+
+.ledger-audit-title {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 4px;
+}
+
+.ledger-table th, .ledger-table td {
+  padding: 5px 6px;
+  text-align: left;
+}
+
+.ledger-table th {
+  color: var(--text-muted);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.ledger-table td {
+  border-bottom: 1px dotted rgba(0,0,0,0.03);
+}
+
+.ledger-debit {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.ledger-credit {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.ui-progress-container {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.ui-progress-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ui-progress-bar-bg {
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.ui-progress-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bg-purple-fill {
+  background: linear-gradient(90deg, var(--secondary), var(--primary));
+}
+
+.bg-green-fill {
+  background: var(--success);
+}
+
+.bg-blue-fill {
+  background: var(--secondary);
+}
+
+.lock-overlay-widget {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px dashed var(--surface-border);
+  border-radius: 16px;
+  padding: 18px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  animation: fadeIn 0.4s ease;
+}
+
+.lock-icon-giant {
+  font-size: 32px;
+  color: var(--warning);
+  margin-bottom: 10px;
+  filter: drop-shadow(0 4px 10px var(--warning-glow));
+}
+
+.btn-small.btn-lock-action {
+  font-size: 12px;
+  padding: 8px 14px;
+  margin-top: 10px;
+}
+
+/* ======================================================================
+   📈 ECOSYSTEM PREMIUM VISUAL ADDITIONS
+   ====================================================================== */
+
+/* 1. Double-Entry Accounting Ledger Visual Sheets */
+.ledger-box-container {
+  margin-top: 14px;
+  background: hsl(220, 15%, 15%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.25);
+  animation: slideDownIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-x: auto;
+}
+
+@keyframes slideDownIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ledger-box-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: hsl(210, 20%, 65%);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10.5px;
+  color: hsl(210, 15%, 85%);
+}
+
+.ledger-table th {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  color: hsl(210, 20%, 75%);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+}
+
+.ledger-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-family: 'Inter', sans-serif;
+}
+
+.ledger-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ledger-ac-code {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: hsl(190, 80%, 70%);
+}
+
+.ledger-val-mono {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  text-align: right;
+}
+
+.ledger-debit {
+  color: hsl(145, 80%, 70%);
+}
+
+.ledger-credit {
+  color: hsl(38, 90%, 70%);
+}
+
+.ledger-table tr.total-row td {
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  font-weight: 700;
+  font-size: 11px;
+  color: #fff;
+  padding-top: 8px;
+}
+
+.ledger-footer-verify {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 9.5px;
+  color: hsl(210, 10%, 55%);
+}
+
+/* 2. Premium locked micro-chart graph elements */
+.sales-chart-premium {
+  margin-top: 14px;
+  padding: 12px;
+  background: var(--bg-color);
+  border-radius: 12px;
+  border: 1px solid var(--surface-border);
+}
+
+.chart-bar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 11px;
+}
+
+.chart-bar-row:last-child {
+  margin-bottom: 0;
+}
+
+.chart-bar-lbl {
+  width: 70px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.chart-bar-progress-container {
+  flex-grow: 1;
+  background: rgba(0, 0, 0, 0.04);
+  height: 10px;
+  border-radius: 5px;
+  margin: 0 10px;
+  overflow: hidden;
+}
+
+.chart-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 1s ease;
+  background: linear-gradient(90deg, var(--secondary), var(--primary));
+}
+
+.chart-bar-fill.purple {
+  background: linear-gradient(90deg, hsl(280, 80%, 55%), var(--primary));
+}
+
+.chart-bar-val {
+  width: 65px;
+  text-align: right;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* 3. Loan repayment progress items */
+.loan-card-item {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+  transition: var(--transition-smooth);
+}
+
+.loan-card-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+  transform: translateY(-2px);
+}
+
+.loan-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.loan-id-lbl {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.loan-metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.loan-metric {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.loan-metric span:first-child {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.loan-metric span:last-child {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.loan-repay-progress-box {
+  margin-bottom: 12px;
+}
+
+.loan-repay-progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+/* 4. Action button cooldown animation lock */
+button:disabled {
+  opacity: 0.65 !important;
+  cursor: not-allowed !important;
+}
+
+.cooldown-spinning {
+  display: inline-block;
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+

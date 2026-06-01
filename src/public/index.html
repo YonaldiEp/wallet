@@ -74,17 +74,6 @@
           <input type="tel" id="reg-phone" placeholder="08123456789">
         </div>
 
-        <div class="input-group">
-          <label for="reg-role"><i class="fa-solid fa-user-tag"></i> Peran Akun (Role)</label>
-          <select id="reg-role" required class="select-input">
-            <option value="RETAIL_CUSTOMER" selected>Retail User (Nasabah Ritel)</option>
-            <option value="MERCHANT">Merchant / Pelaku UMKM</option>
-            <option value="CASHIER">Kasir / Operator POS</option>
-            <option value="SUPPLIER">Supplier Bahan Baku</option>
-            <option value="LOGISTICS">Operator Logistik</option>
-            <option value="ANALYTICS_VIEWER">Auditor / Viewer Analitik</option>
-          </select>
-        </div>
 
         <div class="form-row">
           <div class="input-group">
@@ -163,12 +152,37 @@
               </div>
             </div>
             <div class="card-kyc">
-              <p class="details-label">STATUS & PERAN</p>
-              <div style="display: flex; gap: 6px; margin-top: 4px;">
+              <p class="details-label">KYC STATUS</p>
+              <div style="display: flex; gap: 6px; margin-top: 4px; align-items: center;">
                 <span class="badge badge-kyc" id="profile-kyc-tier">BASIC</span>
-                <span class="badge badge-role" id="profile-role" style="background: linear-gradient(135deg, var(--secondary), var(--primary)); color: #fff;">RETAIL</span>
+                <span class="badge badge-role hidden" id="profile-role" style="background: linear-gradient(135deg, var(--secondary), var(--primary)); color: #fff;">RETAIL</span>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- CBDC STATS & LIMIT BAR -->
+        <div class="compliance-info-card" style="margin-top: 16px; padding: 16px 20px; border-radius: 20px; background: var(--surface-color); border: 1px solid var(--surface-border); box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--text-primary);"><i class="fa-solid fa-gauge text-purple"></i> LIMIT HARIAN & KECEPATAN UANG</span>
+            <span id="limit-cooldown-badge" class="badge" style="background: var(--success); color: #fff; font-size: 9.5px; padding: 2px 6px;">READY</span>
+          </div>
+          
+          <!-- Limit Progress Bar -->
+          <div class="ui-progress-container">
+            <div class="ui-progress-header">
+              <span>Batas Jumlah Transaksi Harian (Maks 10)</span>
+              <span id="limit-count-display">0 / 10 Transaksi</span>
+            </div>
+            <div class="ui-progress-bar-bg">
+              <div id="limit-progress-bar" class="ui-progress-bar-fill bg-purple-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- Nominal Limit -->
+          <div style="margin-top: 8px; font-size: 11px; color: var(--text-secondary); display: flex; justify-content: space-between;">
+            <span>Batas Nominal Per Transaksi:</span>
+            <strong id="limit-nominal-display">Rp 50.000 (Ritel BASIC)</strong>
           </div>
         </div>
 
@@ -232,6 +246,9 @@
             <button type="button" class="settings-tab-btn" id="tab-btn-security" onclick="switchSettingsTab('security-tab')">
               <i class="fa-solid fa-shield-halved"></i> Keamanan
             </button>
+            <button type="button" class="settings-tab-btn" id="tab-btn-upgrade" onclick="switchSettingsTab('upgrade-tab')">
+              <i class="fa-solid fa-circle-up"></i> Upgrade Bisnis
+            </button>
           </div>
 
           <div class="settings-content">
@@ -264,6 +281,36 @@
               </div>
               <button type="submit" class="btn btn-primary btn-block btn-small">
                 Perbarui Keamanan <i class="fa-solid fa-shield-check"></i>
+              </button>
+            </form>
+
+            <!-- UPGRADE FORM -->
+            <form id="settings-upgrade-form" class="settings-tab-content">
+              <p class="form-desc" style="text-align: left; margin-bottom: 12px;">Ajukan peningkatan akun retail menjadi akun bisnis ekosistem RP2 secara instant.</p>
+              
+              <div class="input-group">
+                <label for="upgrade-role"><i class="fa-solid fa-user-tag"></i> Pilih Peran Bisnis</label>
+                <select id="upgrade-role" required class="select-input">
+                  <option value="MERCHANT" selected>Merchant / Toko UMKM</option>
+                  <option value="CASHIER">Kasir / Operator POS</option>
+                  <option value="SUPPLIER">Supplier Bahan Baku</option>
+                  <option value="LOGISTICS">Operator Logistik</option>
+                  <option value="ANALYTICS_VIEWER">Auditor / Viewer Analitik</option>
+                </select>
+              </div>
+
+              <div class="input-group">
+                <label for="upgrade-business-name"><i class="fa-solid fa-store"></i> Nama Bisnis / Instansi</label>
+                <input type="text" id="upgrade-business-name" required placeholder="Contoh: Warung Berkah Ibu">
+              </div>
+
+              <div class="input-group">
+                <label for="upgrade-nik"><i class="fa-solid fa-id-card"></i> NIK / No. Identitas Bisnis</label>
+                <input type="text" id="upgrade-nik" pattern="[0-9]{16}" maxlength="16" required placeholder="16-digit nomor identitas dummy">
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block btn-small">
+                Ajukan Upgrade Akun <i class="fa-solid fa-chevron-right"></i>
               </button>
             </form>
         </div>

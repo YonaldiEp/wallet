@@ -52,6 +52,8 @@ app.post('/api/v1/wallets/me/withdraw', walletController.withdraw);
 app.post('/api/v1/wallets/me/claim-stimulus', walletController.claimStimulus);
 app.put('/api/v1/wallets/me/profile', walletController.updateProfile);
 app.put('/api/v1/wallets/me/security', walletController.updateSecurity);
+app.put('/api/v1/wallets/me/upgrade', walletController.upgradeAccount);
+app.post('/api/v1/wallets/me/subscribe-insight', walletController.subscribeInsight);
 
 // Financial Transactions: Requires JWT Auth + PIN Validation + Idempotency Protection
 app.post('/api/v1/transfers', authMiddleware, idempotencyMiddleware, pinMiddleware, transferController.createTransfer);

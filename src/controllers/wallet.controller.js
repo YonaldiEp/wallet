@@ -177,5 +177,62 @@ export const walletController = {
     } catch (err) {
       next(err);
     }
+  },
+
+  // PUT /api/v1/wallets/me/upgrade
+  upgradeAccount: async (req, res, next) => {
+    try {
+      const { userId } = req.user;
+      const { role, businessName, nik } = req.body;
+
+      if (!role || !businessName || !nik) {
+        return responseHelper.error(res, 'BAD_REQUEST', 'Peran Bisnis, Nama Bisnis, dan NIK wajib diisi untuk pengajuan upgrade', 400);
+      }
+
+      const validRoles = ['MERCHANT', 'CASHIER', 'SUPPLIER', 'LOGISTICS', 'ANALYTICS_VIEWER'];
+      if (!validRoles.includes(role)) {
+        return responseHelper.error(res, 'BAD_REQUEST', 'Peran Bisnis yang diajukan tidak valid', 400);
+      }
+
+      if (nik.trim().length !== 16 || isNaN(parseInt(nik, 10))) {
+        return responseHelper.error(res, 'BAD_REQUEST', 'Nomor NIK harus berupa 16-digit angka dummy', 400);
+      }
+
+      // Update in PostgreSQL (or mock in-memory store)
+      const updateResult = await db.query(
+        'UPDATE users SET role = $1, kyc_tier = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3',
+        [role, 'VERIFIED', userId]
+      );
+
+      if (updateResult.rowCount === 0) {
+        return responseHelper.error(res, 'NOT_FOUND', 'Pengguna tidak ditemukan', 404);
+      }
+
+      console.log(`🚀 [UPGRADE PROCESS] User ${userId} successfully upgraded to role ${role} (KYC: VERIFIED)`);
+
+      return responseHelper.success(res, { 
+        message: `Akun Anda berhasil ditingkatkan menjadi ${role}!`,
+        role,
+        kycTier: 'VERIFIED'
+      }, 200);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // POST /api/v1/wallets/me/subscribe-insight
+  subscribeInsight: async (req, res, next) => {
+    try {
+      const { walletId } = req.user;
+      
+      const receipt = await centralBankService.subscribeInsight(walletId);
+      
+      return responseHelper.success(res, {
+        message: 'Pembayaran langganan premium UMKM Insight berhasil diselesaikan',
+        receipt
+      }, 200);
+    } catch (err) {
+      next(err);
+    }
   }
 };

@@ -62,15 +62,19 @@ function showDashboard() {
   // Dynamic role assignment display
   const profileRole = document.getElementById('profile-role');
   if (profileRole) {
-    const roleLabels = {
-      'RETAIL_CUSTOMER': 'RETAIL',
-      'MERCHANT': 'MERCHANT',
-      'CASHIER': 'CASHIER',
-      'SUPPLIER': 'SUPPLIER',
-      'LOGISTICS': 'LOGISTICS',
-      'ANALYTICS_VIEWER': 'AUDITOR'
-    };
-    profileRole.textContent = roleLabels[user.role] || user.role || 'RETAIL';
+    if (!user.role || user.role === 'RETAIL_CUSTOMER') {
+      profileRole.classList.add('hidden');
+    } else {
+      const roleLabels = {
+        'MERCHANT': 'MERCHANT',
+        'CASHIER': 'CASHIER',
+        'SUPPLIER': 'SUPPLIER',
+        'LOGISTICS': 'LOGISTICS',
+        'ANALYTICS_VIEWER': 'AUDITOR'
+      };
+      profileRole.textContent = roleLabels[user.role] || user.role;
+      profileRole.classList.remove('hidden');
+    }
   }
 
   // Populate dynamic role-based ecosystem panel content
@@ -86,22 +90,83 @@ function showDashboard() {
 }
 
 function renderEcosystemPanel() {
+  const panel = document.getElementById('role-ecosystem-panel');
   const panelContent = document.getElementById('role-panel-content');
-  if (!panelContent) return;
+  if (!panel || !panelContent) return;
 
   const role = user.role || 'RETAIL_CUSTOMER';
 
   if (role === 'RETAIL_CUSTOMER') {
-    panelContent.innerHTML = `
-      <div class="role-widget" style="padding: 10px 0;">
-        <p style="font-size: 13.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;"><i class="fa-solid fa-cart-shopping text-purple"></i> PasarKita Marketplace</p>
-        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">Sebagai nasabah ritel, Anda dapat membeli produk UMKM di PasarKita.</p>
-        <button type="button" class="btn btn-primary btn-block btn-small" onclick="openModal('pay-modal')" style="font-size: 12.5px; padding: 8px 12px;">
-          Belanja & Bayar Invoice <i class="fa-solid fa-bag-shopping"></i>
-        </button>
-      </div>
-    `;
-  } else if (role === 'MERCHANT') {
+    panel.classList.add('hidden');
+    return;
+  }
+
+  panel.classList.remove('hidden');
+
+  if (role === 'MERCHANT') {
+    const isSubscribed = localStorage.getItem(`insight_subscribed_${user.walletId}`) === 'true';
+
+    let insightContent = '';
+    if (isSubscribed) {
+      insightContent = `
+        <div style="background: rgba(40,200,80,0.03); padding: 12px; border-radius: 12px; border: 1px solid rgba(40,200,80,0.12); position: relative; overflow: hidden; margin-top: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <p style="font-size: 11.5px; font-weight: 700; color: var(--text-primary); margin: 0;">
+              <i class="fa-solid fa-chart-line text-success"></i> LIVE INSIGHT PENJUALAN
+            </p>
+            <span class="badge" style="background: var(--success); color: #fff; font-size: 8px; padding: 2px 4px;">PREMIUM</span>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px; margin-bottom: 12px;">
+            <div>Gross: <strong class="text-success">Rp 100.000</strong></div>
+            <div>Net Sales: <strong>Rp 94.500</strong></div>
+            <div>Pajak (2%): <span class="text-danger">Rp 2.000</span></div>
+            <div>Fees (3.5%): <span class="text-danger">Rp 3.500</span></div>
+          </div>
+
+          <!-- Micro bar chart elements -->
+          <div class="sales-chart-premium">
+            <div class="chart-bar-row">
+              <span class="chart-bar-lbl">Gross</span>
+              <div class="chart-bar-progress-container">
+                <div class="chart-bar-fill" style="width: 100%;"></div>
+              </div>
+              <span class="chart-bar-val">100.000</span>
+            </div>
+            <div class="chart-bar-row">
+              <span class="chart-bar-lbl">Net Sales</span>
+              <div class="chart-bar-progress-container">
+                <div class="chart-bar-fill purple" style="width: 94.5%;"></div>
+              </div>
+              <span class="chart-bar-val">94.500</span>
+            </div>
+            <div class="chart-bar-row">
+              <span class="chart-bar-lbl">Operational</span>
+              <div class="chart-bar-progress-container">
+                <div class="chart-bar-fill" style="width: 5.5%; background: var(--danger);"></div>
+              </div>
+              <span class="chart-bar-val">5.500</span>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      insightContent = `
+        <div class="lock-overlay-widget" style="margin-top: 10px; position: relative;">
+          <div class="lock-icon-giant"><i class="fa-solid fa-gem cooldown-spinning" style="animation-duration: 4s;"></i></div>
+          <p style="font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+            🔒 UMKM INSIGHT ANALYTICS
+          </p>
+          <p style="font-size: 11px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 12px;">
+            Analisis gross profit, fee operasional, dan beban pajak tokomu dikunci. Aktifkan langganan mingguan.
+          </p>
+          <button type="button" class="btn btn-primary btn-block btn-small btn-lock-action" onclick="subscribeMerchantInsight()">
+            Aktifkan Premium (Rp 10.000) <i class="fa-solid fa-circle-arrow-up"></i>
+          </button>
+        </div>
+      `;
+    }
+
     panelContent.innerHTML = `
       <div class="role-widget" style="padding: 10px 0;">
         <p style="font-size: 13.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;"><i class="fa-solid fa-store text-purple"></i> Alat Merchant UMKM</p>
@@ -109,17 +174,7 @@ function renderEcosystemPanel() {
         <button type="button" class="btn btn-primary btn-block btn-small" onclick="openModal('pay-modal')" style="font-size: 12.5px; padding: 8px 12px; margin-bottom: 12px;">
           Buka Invoice Generator <i class="fa-solid fa-qrcode"></i>
         </button>
-        <div style="background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; border: 1px dashed var(--surface-border);">
-          <p style="font-size: 11.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">
-            <i class="fa-solid fa-chart-line text-success"></i> Mini Insight Penjualan
-          </p>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
-            <div>Gross: <strong class="text-success">Rp 100.000</strong></div>
-            <div>Net: <strong>Rp 94.500</strong></div>
-            <div>Pajak (2%): <span class="text-danger">Rp 2.000</span></div>
-            <div>Fee (3.5%): <span class="text-danger">Rp 3.500</span></div>
-          </div>
-        </div>
+        ${insightContent}
       </div>
     `;
   } else if (role === 'CASHIER') {
@@ -271,9 +326,37 @@ async function loadDashboardData() {
       const data = result.data;
       // Animate balance counting dynamically
       animateNumber('wallet-balance', data.available_balance);
+      
+      const limitCountDisplay = document.getElementById('limit-count-display');
+      const limitProgressBar = document.getElementById('limit-progress-bar');
+      const limitNominalDisplay = document.getElementById('limit-nominal-display');
+
       if (limitCountDisplay) {
         limitCountDisplay.textContent = `${data.daily_transaction_count} / ${data.daily_limit_count} Transaksi`;
       }
+      if (limitProgressBar) {
+        const pct = Math.min(100, (data.daily_transaction_count / data.daily_limit_count) * 100);
+        limitProgressBar.style.width = `${pct}%`;
+        
+        // Dynamic limit bar coloring
+        if (pct >= 90) {
+          limitProgressBar.style.background = 'var(--danger)';
+        } else if (pct >= 60) {
+          limitProgressBar.style.background = 'var(--warning)';
+        } else {
+          limitProgressBar.style.background = 'linear-gradient(90deg, var(--secondary), var(--primary))';
+        }
+      }
+      if (limitNominalDisplay) {
+        if (user.kycTier === 'VERIFIED') {
+          limitNominalDisplay.innerHTML = `<span>Batas Nominal Per Transaksi:</span> <strong>Rp 1.000.000 (Bisnis VERIFIED)</strong>`;
+        } else {
+          limitNominalDisplay.innerHTML = `<span>Batas Nominal Per Transaksi:</span> <strong>Rp 50.000 (Ritel BASIC)</strong>`;
+        }
+      }
+
+      // Track monetary velocity controls and locks
+      handleCooldownTimer(data.last_transaction_at, data.daily_transaction_count >= data.daily_limit_count);
     }
   } catch (err) {
     console.error('Gagal mengambil saldo:', err);
@@ -349,22 +432,41 @@ async function loadTransactionHistory() {
 
         const card = document.createElement('div');
         card.className = 'tx-card';
+        card.style.display = 'flex';
+        card.style.flexDirection = 'column';
+        
         card.innerHTML = `
-          <div class="tx-meta">
-            <div class="tx-icon-badge ${iconClass}">
-              ${txIcon}
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div class="tx-meta">
+              <div class="tx-icon-badge ${iconClass}">
+                ${txIcon}
+              </div>
+              <div class="tx-details">
+                <span class="tx-title">${tx.transaction_type} - ${tx.other_party}</span>
+                <span class="tx-time">${dateStr}</span>
+                ${tx.note ? `<span class="tx-note">"${tx.note}"</span>` : ''}
+              </div>
             </div>
-            <div class="tx-details">
-              <span class="tx-title">${tx.transaction_type} - ${tx.other_party}</span>
-              <span class="tx-time">${dateStr}</span>
-              ${tx.note ? `<span class="tx-note">"${tx.note}"</span>` : ''}
+            <div class="tx-financial" style="text-align: right;">
+              <span class="tx-amount ${amountClass}">${sign} Rp ${tx.gross_amount.toLocaleString('id-ID')}</span>
+              ${feeString}
             </div>
           </div>
-          <div class="tx-financial">
-            <span class="tx-amount ${amountClass}">${sign} Rp ${tx.gross_amount.toLocaleString('id-ID')}</span>
-            ${feeString}
+          <div class="ledger-box-container hidden" style="width: 100%;">
+            ${generateLedgerHTML(tx)}
           </div>
         `;
+
+        // Toggle audit trail
+        card.addEventListener('click', (e) => {
+          // If click was inside button or links, don't toggle
+          if (e.target.closest('button') || e.target.closest('a')) return;
+          const container = card.querySelector('.ledger-box-container');
+          if (container) {
+            container.classList.toggle('hidden');
+          }
+        });
+
         transactionsFeed.appendChild(card);
       });
     }
@@ -434,12 +536,13 @@ async function loadLoansList() {
 
     loansFeed.innerHTML = '';
     myLoans.forEach(loan => {
+      const progressPercent = Math.min(100, Math.round((loan.paidAmount / loan.totalDue) * 100));
       const item = document.createElement('div');
       item.className = 'loan-card-item';
       item.innerHTML = `
         <div class="loan-card-header">
           <span class="loan-id-lbl"><i class="fa-solid fa-file-invoice"></i> ID: ${loan.id}</span>
-          <span class="badge badge-pending">${loan.status}</span>
+          <span class="badge badge-pending" style="background: ${loan.status === 'PARTIAL_PAID' ? 'var(--warning)' : 'var(--secondary)'}; color: #fff; font-size: 9px; padding: 2px 6px;">${loan.status}</span>
         </div>
         <div class="loan-metric-grid">
           <div class="loan-metric">
@@ -456,10 +559,21 @@ async function loadLoansList() {
           </div>
           <div class="loan-metric">
             <span>Sisa Tagihan</span>
-            <span class="text-danger">Rp ${loan.remainingDue.toLocaleString('id-ID')}</span>
+            <span class="text-danger" style="font-weight: 700;">Rp ${loan.remainingDue.toLocaleString('id-ID')}</span>
           </div>
         </div>
-        <button class="btn btn-success btn-small btn-repay-trigger" onclick="selectLoanForRepay('${loan.id}', ${loan.remainingDue})">
+        
+        <div class="loan-repay-progress-box">
+          <div class="loan-repay-progress-header">
+            <span>Progres Pelunasan</span>
+            <strong>${progressPercent}%</strong>
+          </div>
+          <div class="ui-progress-bar-bg" style="height: 6px; background: rgba(0, 0, 0, 0.05); border-radius: 3px; overflow: hidden; margin-top: 4px;">
+            <div class="ui-progress-bar-fill bg-green-fill" style="width: ${progressPercent}%; height: 100%; border-radius: 3px; background: var(--success); transition: width 0.6s ease;"></div>
+          </div>
+        </div>
+
+        <button class="btn btn-success btn-small btn-repay-trigger" onclick="selectLoanForRepay('${loan.id}', ${loan.remainingDue})" style="width: 100%; font-size: 12px; padding: 6px 12px; margin-top: 6px;">
           Bayar Cicilan <i class="fa-solid fa-receipt"></i>
         </button>
       `;
@@ -533,7 +647,6 @@ function setupAuthEventListeners() {
     const name = document.getElementById('reg-name').value;
     const email = document.getElementById('reg-email').value;
     const phone = document.getElementById('reg-phone').value;
-    const role = document.getElementById('reg-role').value;
     const password = document.getElementById('reg-password').value;
     const pin = document.getElementById('reg-pin').value;
 
@@ -541,7 +654,7 @@ function setupAuthEventListeners() {
       const res = await fetch(`${BASE_URL}/api/v1/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, phone, role, password, pin })
+        body: JSON.stringify({ name, email, phone, password, pin, role: 'RETAIL_CUSTOMER' })
       });
       const result = await res.json();
 
@@ -924,15 +1037,19 @@ window.switchSettingsTab = function(tabId) {
   if (tabId === 'profile-tab') {
     document.getElementById('tab-btn-profile').classList.add('active');
     document.getElementById('settings-profile-form').classList.add('active');
-  } else {
+  } else if (tabId === 'security-tab') {
     document.getElementById('tab-btn-security').classList.add('active');
     document.getElementById('settings-security-form').classList.add('active');
+  } else if (tabId === 'upgrade-tab') {
+    document.getElementById('tab-btn-upgrade').classList.add('active');
+    document.getElementById('settings-upgrade-form').classList.add('active');
   }
 };
 
 function setupSettingsEventListeners() {
   const profileForm = document.getElementById('settings-profile-form');
   const securityForm = document.getElementById('settings-security-form');
+  const upgradeForm = document.getElementById('settings-upgrade-form');
   
   if (profileForm) {
     profileForm.addEventListener('submit', async (e) => {
@@ -1008,5 +1125,314 @@ function setupSettingsEventListeners() {
       }
     });
   }
+
+  if (upgradeForm) {
+    upgradeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const role = document.getElementById('upgrade-role').value;
+      const businessName = document.getElementById('upgrade-business-name').value;
+      const nik = document.getElementById('upgrade-nik').value;
+
+      try {
+        const res = await fetch(`${BASE_URL}/api/v1/wallets/me/upgrade`, {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ role, businessName, nik })
+        });
+        
+        const result = await res.json();
+        if (result.success) {
+          showToast(`Akun Anda berhasil ditingkatkan menjadi ${role}!`, 'success');
+          
+          // Update local session storage
+          user.role = result.data.role;
+          user.kycTier = result.data.kycTier;
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          
+          // Refresh UI elements
+          profileKycTier.textContent = result.data.kycTier;
+          const profileRole = document.getElementById('profile-role');
+          if (profileRole) {
+            const roleLabels = {
+              'RETAIL_CUSTOMER': 'RETAIL',
+              'MERCHANT': 'MERCHANT',
+              'CASHIER': 'CASHIER',
+              'SUPPLIER': 'SUPPLIER',
+              'LOGISTICS': 'LOGISTICS',
+              'ANALYTICS_VIEWER': 'AUDITOR'
+            };
+            profileRole.textContent = roleLabels[result.data.role] || result.data.role || 'RETAIL';
+          }
+          
+          renderEcosystemPanel();
+          
+          // Clear inputs
+          document.getElementById('upgrade-business-name').value = '';
+          document.getElementById('upgrade-nik').value = '';
+          
+          // Switch back to profile tab
+          switchSettingsTab('profile-tab');
+        } else {
+          showToast(result.error.message, 'error');
+        }
+      } catch (err) {
+        showToast('Koneksi ke server gagal.', 'error');
+      }
+    });
+  }
+}
+
+// 8. DOUBLE-ENTRY LEDGER GENERATOR (CLIENT-SIDE)
+function generateLedgerHTML(tx) {
+  const isIncoming = tx.direction === 'IN';
+  const type = tx.transaction_type;
+  const gross = tx.gross_amount;
+  const total = tx.total_debit || gross;
+  const fee = tx.fee_total || 0;
+  const tax = tx.tax_total || 0;
+  
+  // Base split of fees if available in metadata
+  let bankFee = 0;
+  let gatewayFee = 0;
+  if (tx.fees) {
+    bankFee = tx.fees.bank_fee || 0;
+    gatewayFee = tx.fees.gateway_fee || 0;
+  } else if (fee > 0) {
+    // Math approximation based on 100bps/50bps structure if split metadata missing
+    bankFee = Math.floor(fee * (2/3));
+    gatewayFee = fee - bankFee;
+  }
+
+  let entries = [];
+
+  if (type === 'STIMULUS') {
+    // System dispatches monetary stimulus
+    // Debit STIMULUS_EXPENSE, Credit USER_WALLET
+    entries.push({ no: 1, account: '11300 - STIMULUS_EXPENSE', dr: gross, cr: 0 });
+    entries.push({ no: 2, account: `11100 - USER_WALLET (Self)`, dr: 0, cr: gross });
+  } 
+  else if (type === 'TRANSFER') {
+    if (!isIncoming) {
+      // We are Payer:
+      // Debit USER_WALLET (system debit reduction of target)
+      // Credit USER_WALLET (Payee) for Net Received
+      // Credit Fee and Tax sinks
+      entries.push({ no: 1, account: '11100 - USER_WALLET (Payer - Self)', dr: total, cr: 0 });
+      entries.push({ no: 2, account: '11110 - USER_WALLET (Payee - Receiver)', dr: 0, cr: gross });
+      if (bankFee > 0) entries.push({ no: 3, account: '41100 - FEE_BANK (Revenue)', dr: 0, cr: bankFee });
+      if (gatewayFee > 0) entries.push({ no: 4, account: '41200 - FEE_GATEWAY (Infrastructure)', dr: 0, cr: gatewayFee });
+      if (tax > 0) entries.push({ no: 5, account: '51100 - TAX_SINK (Monetary Sink)', dr: 0, cr: tax });
+    } else {
+      // We are Payee:
+      // Debit USER_WALLET (Self) for gross
+      // Credit USER_WALLET (Payer) for gross
+      entries.push({ no: 1, account: '11100 - USER_WALLET (Payee - Self)', dr: gross, cr: 0 });
+      entries.push({ no: 2, account: '11110 - USER_WALLET (Payer - Sender)', dr: 0, cr: gross });
+    }
+  } 
+  else if (type === 'PAYMENT') {
+    if (!isIncoming) {
+      // We are paying invoice:
+      // Debit USER_WALLET (Self) for total amount_due
+      // Credit MERCHANT_WALLET for gross_amount
+      // Credit Fee and Tax sinks
+      entries.push({ no: 1, account: '11100 - USER_WALLET (Payer - Self)', dr: total, cr: 0 });
+      entries.push({ no: 2, account: '11200 - MERCHANT_WALLET (Payee)', dr: 0, cr: gross });
+      if (fee > 0) entries.push({ no: 3, account: '41300 - FEE_POS / FEE_MARKETPLACE', dr: 0, cr: fee });
+      if (tax > 0) entries.push({ no: 4, account: '51100 - TAX_SINK (Monetary Sink)', dr: 0, cr: tax });
+    } else {
+      // We are Merchant receiving payment:
+      // Debit MERCHANT_WALLET (Self) for gross received
+      // Credit USER_WALLET (Payer) for gross
+      entries.push({ no: 1, account: '11200 - MERCHANT_WALLET (Payee - Self)', dr: gross, cr: 0 });
+      entries.push({ no: 2, account: '11100 - USER_WALLET (Payer)', dr: 0, cr: gross });
+    }
+  } 
+  else if (type === 'LOAN_DISBURSEMENT') {
+    // Debit LOAN_RECEIVABLE (Central Bank asset), Credit USER_WALLET (user balance)
+    entries.push({ no: 1, account: '12100 - LOAN_RECEIVABLE (Asset)', dr: gross, cr: 0 });
+    entries.push({ no: 2, account: '11100 - USER_WALLET (Borrower - Self)', dr: 0, cr: gross });
+  } 
+  else if (type === 'LOAN_REPAYMENT') {
+    // Debit CENTRAL_RESERVE, Credit LOAN_RECEIVABLE
+    entries.push({ no: 1, account: '10100 - CENTRAL_RESERVE (Cash in Vault)', dr: gross, cr: 0 });
+    entries.push({ no: 2, account: '12100 - LOAN_RECEIVABLE (Reduction)', dr: 0, cr: gross });
+  } 
+  else if (type === 'TOPUP') {
+    // Debit USER_WALLET, Credit CENTRAL_RESERVE
+    entries.push({ no: 1, account: '11100 - USER_WALLET (Self)', dr: gross, cr: 0 });
+    entries.push({ no: 2, account: '10100 - CENTRAL_RESERVE (Reserve Drawdown)', dr: 0, cr: gross });
+  } 
+  else if (type === 'WITHDRAWAL') {
+    // Debit CENTRAL_RESERVE, Credit USER_WALLET
+    entries.push({ no: 1, account: '10100 - CENTRAL_RESERVE (Returned Cash)', dr: gross, cr: 0 });
+    entries.push({ no: 2, account: '11100 - USER_WALLET (Self - Debit Cashout)', dr: 0, cr: gross });
+  } 
+  else if (type === 'FEE') {
+    // Insight subscription:
+    // Debit USER_WALLET (Self), Credit FEE_BANK (Subscription Revenue)
+    entries.push({ no: 1, account: '11100 - USER_WALLET (Payer - Self)', dr: gross, cr: 0 });
+    entries.push({ no: 2, account: '41400 - FEE_SAAS_INSIGHT (Premium Revenue)', dr: 0, cr: gross });
+  } 
+  else {
+    // Generic fallback
+    entries.push({ no: 1, account: '11100 - USER_WALLET (Self)', dr: isIncoming ? gross : 0, cr: isIncoming ? 0 : gross });
+    entries.push({ no: 2, account: '10100 - CENTRAL_RESERVE', dr: isIncoming ? 0 : gross, cr: isIncoming ? gross : 0 });
+  }
+
+  // Calculate sum totals
+  const totalDr = entries.reduce((sum, e) => sum + e.dr, 0);
+  const totalCr = entries.reduce((sum, e) => sum + e.cr, 0);
+
+  // Render Table
+  let tableRows = entries.map(e => `
+    <tr>
+      <td>${e.no}</td>
+      <td class="ledger-ac-code">${e.account}</td>
+      <td class="ledger-val-mono ledger-debit">${e.dr > 0 ? `Rp ${e.dr.toLocaleString('id-ID')}` : '-'}</td>
+      <td class="ledger-val-mono ledger-credit">${e.cr > 0 ? `Rp ${e.cr.toLocaleString('id-ID')}` : '-'}</td>
+    </tr>
+  `).join('');
+
+  return `
+    <div class="ledger-box-container">
+      <div class="ledger-box-title">
+        <span><i class="fa-solid fa-scale-balanced text-success"></i> Jurnal Audit Double-Entry CB</span>
+        <span style="font-size: 9px; padding: 2px 6px; background: rgba(40,200,80,0.15); color: var(--success); border-radius: 4px;">SECURED-SHA256</span>
+      </div>
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th style="width: 8%;">No</th>
+            <th style="width: 52%;">Nama & Kode Akun</th>
+            <th style="width: 20%; text-align: right;">Debit (Dr)</th>
+            <th style="width: 20%; text-align: right;">Kredit (Cr)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows}
+          <tr class="total-row">
+            <td colspan="2" style="text-align: right;">TOTAL:</td>
+            <td class="ledger-val-mono" style="color: hsl(145, 80%, 70%);">Rp ${totalDr.toLocaleString('id-ID')}</td>
+            <td class="ledger-val-mono" style="color: hsl(145, 80%, 70%);">Rp ${totalCr.toLocaleString('id-ID')}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="ledger-footer-verify">
+        <span>Status: <strong>SETTLED & BALANCED</strong></span>
+        <span>System: <strong>SmartBank Tier-2 Core</strong></span>
+      </div>
+    </div>
+  `;
+}
+
+// 9. SUBSCRIBE TO MERCHANT INSIGHT PREMIUM (Rp 10.000)
+window.subscribeMerchantInsight = async function() {
+  try {
+    const res = await fetch(`${BASE_URL}/api/v1/wallets/me/subscribe-insight`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const result = await res.json();
+    if (result.success) {
+      localStorage.setItem(`insight_subscribed_${user.walletId}`, 'true');
+      showToast('Langganan UMKM Insight Premium Aktif! Mengurangi Rp 10.000.', 'success');
+      loadDashboardData();
+    } else {
+      showToast(result.error.message, 'error');
+    }
+  } catch (err) {
+    showToast('Koneksi ke server gagal.', 'error');
+  }
+};
+
+// 10. VELOCITY COOLDOWN & DAILY LIMIT BUTTON BLOCKER
+let cooldownIntervalId = null;
+
+function handleCooldownTimer(lastTxTime, isDailyLimitHit) {
+  // Clear any existing cooldown running interval
+  if (cooldownIntervalId) {
+    clearInterval(cooldownIntervalId);
+    cooldownIntervalId = null;
+  }
+
+  const badge = document.getElementById('limit-cooldown-badge');
+  const transferSubmitBtn = document.querySelector('#transfer-form button[type="submit"]');
+  const paySubmitBtn = document.querySelector('#pay-invoice-form button[type="submit"]');
+
+  // Priority 1: If daily transaction count limit is reached, permanently lock actions for today
+  if (isDailyLimitHit) {
+    if (badge) {
+      badge.textContent = 'LIMIT HARIAN HABIS';
+      badge.style.background = 'var(--danger)';
+    }
+    if (transferSubmitBtn) {
+      transferSubmitBtn.disabled = true;
+      transferSubmitBtn.innerHTML = 'Limit Transaksi Harian Terlampaui <i class="fa-solid fa-ban"></i>';
+    }
+    if (paySubmitBtn) {
+      paySubmitBtn.disabled = true;
+      paySubmitBtn.innerHTML = 'Limit Transaksi Harian Terlampaui <i class="fa-solid fa-ban"></i>';
+    }
+    return;
+  }
+
+  // Priority 2: Cooldown checks (10-second rule)
+  if (!lastTxTime) {
+    if (badge) {
+      badge.textContent = 'READY';
+      badge.style.background = 'var(--success)';
+    }
+    if (transferSubmitBtn) {
+      transferSubmitBtn.disabled = false;
+      transferSubmitBtn.innerHTML = 'Konfirmasi & Kirim Dana <i class="fa-solid fa-check"></i>';
+    }
+    if (paySubmitBtn) {
+      paySubmitBtn.disabled = false;
+      paySubmitBtn.innerHTML = 'Selesaikan Pembayaran <i class="fa-solid fa-receipt"></i>';
+    }
+    return;
+  }
+
+  const updateUI = () => {
+    const elapsed = Math.floor((Date.now() - new Date(lastTxTime).getTime()) / 1000);
+    const remaining = 10 - elapsed; // 10s cooldown
+
+    if (remaining > 0) {
+      if (badge) {
+        badge.textContent = `COOLDOWN (${remaining}s)`;
+        badge.style.background = 'var(--warning)';
+      }
+      if (transferSubmitBtn) {
+        transferSubmitBtn.disabled = true;
+        transferSubmitBtn.innerHTML = `Jeda Keamanan (${remaining}s) <i class="fa-solid fa-spinner fa-spin"></i>`;
+      }
+      if (paySubmitBtn) {
+        paySubmitBtn.disabled = true;
+        paySubmitBtn.innerHTML = `Jeda Keamanan (${remaining}s) <i class="fa-solid fa-spinner fa-spin"></i>`;
+      }
+    } else {
+      clearInterval(cooldownIntervalId);
+      cooldownIntervalId = null;
+      if (badge) {
+        badge.textContent = 'READY';
+        badge.style.background = 'var(--success)';
+      }
+      if (transferSubmitBtn) {
+        transferSubmitBtn.disabled = false;
+        transferSubmitBtn.innerHTML = 'Konfirmasi & Kirim Dana <i class="fa-solid fa-check"></i>';
+      }
+      if (paySubmitBtn) {
+        paySubmitBtn.disabled = false;
+        paySubmitBtn.innerHTML = 'Selesaikan Pembayaran <i class="fa-solid fa-receipt"></i>';
+      }
+    }
+  };
+
+  updateUI();
+  cooldownIntervalId = setInterval(updateUI, 1000);
 }
 

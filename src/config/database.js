@@ -105,6 +105,17 @@ export const db = {
       return { rows: [], rowCount: 0 };
     }
 
+    if (sql.includes('UPDATE users SET role = $1, kyc_tier = $2')) {
+      const [role, kyc_tier, id] = params;
+      const index = inMemoryStore.users.findIndex(u => u.id === id);
+      if (index !== -1) {
+        inMemoryStore.users[index].role = role;
+        inMemoryStore.users[index].kyc_tier = kyc_tier;
+        return { rows: [inMemoryStore.users[index]], rowCount: 1 };
+      }
+      return { rows: [], rowCount: 0 };
+    }
+
     if (sql.includes('UPDATE users SET password_hash = $1')) {
       const [password_hash, id] = params;
       const index = inMemoryStore.users.findIndex(u => u.id === id);
