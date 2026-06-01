@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartBank Wallet - CBDC Tier-2 Retail E-Wallet</title>
+  <!-- Google Fonts Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background Animated Gradient Shapes -->
+  <div class="bg-shape shape-1"></div>
+  <div class="bg-shape shape-2"></div>
+  <div class="bg-shape shape-3"></div>
+
+  <!-- Central Notification Toast -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- ================= AUTH CONTAINER ================= -->
+  <div id="auth-screen" class="auth-screen container">
+    <div class="auth-card">
+      <div class="brand">
+        <i class="fa-solid fa-building-columns brand-icon"></i>
+        <h1>SmartBank <span>Wallet</span></h1>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="login-form" class="auth-form active">
+        <h2>Masuk Ke Akun</h2>
+        <p class="form-desc">Kelola transaksi keuangan secara aman</p>
+        
+        <div class="input-group">
+          <label for="login-email"><i class="fa-solid fa-envelope"></i> Email</label>
+          <input type="email" id="login-email" required placeholder="yonaldi@example.com">
+        </div>
+
+        <div class="input-group">
+          <label for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
+          <input type="password" id="login-password" required placeholder="••••••••">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          Masuk <i class="fa-solid fa-arrow-right-to-bracket"></i>
+        </button>
+
+        <p class="switch-form-text">
+          Belum memiliki akun? <a href="#" id="go-to-register">Daftar Sekarang</a>
+        </p>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="register-form" class="auth-form">
+        <h2>Pendaftaran Wallet</h2>
+        <p class="form-desc">Pendaftaran akun baru SmartBank</p>
+
+        <div class="input-group">
+          <label for="reg-name"><i class="fa-solid fa-user"></i> Nama Lengkap</label>
+          <input type="text" id="reg-name" required placeholder="Yonaldi Ernanda">
+        </div>
+
+        <div class="input-group">
+          <label for="reg-email"><i class="fa-solid fa-envelope"></i> Email</label>
+          <input type="email" id="reg-email" required placeholder="yonaldi@example.com">
+        </div>
+
+        <div class="input-group">
+          <label for="reg-phone"><i class="fa-solid fa-phone"></i> Nomor HP</label>
+          <input type="tel" id="reg-phone" placeholder="08123456789">
+        </div>
+
+        <div class="input-group">
+          <label for="reg-role"><i class="fa-solid fa-user-tag"></i> Peran Akun (Role)</label>
+          <select id="reg-role" required class="select-input">
+            <option value="RETAIL_CUSTOMER" selected>Retail User (Nasabah Ritel)</option>
+            <option value="MERCHANT">Merchant / Pelaku UMKM</option>
+            <option value="CASHIER">Kasir / Operator POS</option>
+            <option value="SUPPLIER">Supplier Bahan Baku</option>
+            <option value="LOGISTICS">Operator Logistik</option>
+            <option value="ANALYTICS_VIEWER">Auditor / Viewer Analitik</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="input-group">
+            <label for="reg-password"><i class="fa-solid fa-lock"></i> Password</label>
+            <input type="password" id="reg-password" required placeholder="••••••••">
+          </div>
+          <div class="input-group">
+            <label for="reg-pin"><i class="fa-solid fa-shield-halved"></i> PIN Transaksi (6-digit)</label>
+            <input type="password" id="reg-pin" pattern="[0-9]{6}" maxlength="6" required placeholder="123456">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          Daftar & Buat Wallet <i class="fa-solid fa-wallet"></i>
+        </button>
+
+        <p class="switch-form-text">
+          Sudah memiliki akun? <a href="#" id="go-to-login">Masuk</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MAIN DASHBOARD CONTAINER ================= -->
+  <div id="dashboard-screen" class="dashboard-screen container hidden">
+    
+    <!-- DASHBOARD HEADER -->
+    <header class="dashboard-header">
+      <div class="header-logo">
+        <i class="fa-solid fa-building-columns logo-icon"></i>
+        <h2>SmartBank <span>Wallet</span></h2>
+      </div>
+      <div class="user-profile-menu">
+        <div class="user-info">
+          <span class="user-name" id="profile-name">Loading...</span>
+          <span class="user-status"><i class="fa-solid fa-circle-check text-success"></i> Aktif</span>
+        </div>
+        <button id="btn-logout" class="btn btn-icon btn-logout" title="Keluar">
+          <i class="fa-solid fa-power-off"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- DASHBOARD CONTENT GRID -->
+    <main class="dashboard-grid">
+      
+      <!-- LEFT SECTION: BALANCE CARD & ACTIONS -->
+      <section class="left-section">
+        
+        <!-- CBDC PREMIUM CARD -->
+        <div class="cbdc-card">
+          <div class="card-glass-glow"></div>
+          <div class="card-header">
+            <div class="card-brand">
+              <i class="fa-solid fa-microchip brand-card-icon"></i>
+              <span>SmartBank Card</span>
+            </div>
+          </div>
+          
+          <div class="card-balance-section">
+            <div class="balance-wrapper">
+              <p class="balance-label">TOTAL SALDO</p>
+              <h1 class="balance-value">Rp <span id="wallet-balance">0</span></h1>
+            </div>
+            <div class="card-chip"></div>
+          </div>
+
+          <div class="card-footer">
+            <div class="card-details">
+              <p class="details-label">WALLET ID</p>
+              <div class="wallet-id-container">
+                <span class="details-value" id="profile-wallet-id">wal_loading...</span>
+                <button class="btn-copy" id="btn-copy-wallet" title="Salin Wallet ID">
+                  <i class="fa-solid fa-copy"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-kyc">
+              <p class="details-label">STATUS & PERAN</p>
+              <div style="display: flex; gap: 6px; margin-top: 4px;">
+                <span class="badge badge-kyc" id="profile-kyc-tier">BASIC</span>
+                <span class="badge badge-role" id="profile-role" style="background: linear-gradient(135deg, var(--secondary), var(--primary)); color: #fff;">RETAIL</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK ACTIONS BAR -->
+        <div class="quick-actions">
+          <h3>AKSI FINANSIAL</h3>
+          <div class="actions-grid">
+            <button class="action-btn" onclick="openModal('transfer-modal')">
+              <div class="action-icon purple-gradient">
+                <i class="fa-solid fa-paper-plane"></i>
+              </div>
+              <span>Transfer P2P</span>
+            </button>
+
+            <button class="action-btn" onclick="openModal('pay-modal')">
+              <div class="action-icon blue-gradient">
+                <i class="fa-solid fa-qrcode"></i>
+              </div>
+              <span>Bayar Tagihan</span>
+            </button>
+
+            <button class="action-btn" onclick="openModal('loan-modal')">
+              <div class="action-icon emerald-gradient">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+              </div>
+              <span>Kredit UMKM</span>
+            </button>
+
+            <button class="action-btn" onclick="openModal('topup-modal')">
+              <div class="action-icon purple-gradient">
+                <i class="fa-solid fa-circle-plus"></i>
+              </div>
+              <span>Top Up Saldo</span>
+            </button>
+
+            <button class="action-btn" onclick="openModal('withdraw-modal')">
+              <div class="action-icon blue-gradient">
+                <i class="fa-solid fa-circle-minus"></i>
+              </div>
+              <span>Tarik Tunai</span>
+            </button>
+
+            <button class="action-btn" id="btn-claim-stimulus">
+              <div class="action-icon emerald-gradient">
+                <i class="fa-solid fa-gift"></i>
+              </div>
+              <span>Klaim Stimulus</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ACCOUNT SETTINGS BAR -->
+        <div class="quick-actions" id="account-settings-card">
+          <h3>PENGATURAN AKUN</h3>
+          
+          <!-- Tab Navigation inside card -->
+          <div class="settings-tabs">
+            <button type="button" class="settings-tab-btn active" id="tab-btn-profile" onclick="switchSettingsTab('profile-tab')">
+              <i class="fa-solid fa-user-gear"></i> Profil
+            </button>
+            <button type="button" class="settings-tab-btn" id="tab-btn-security" onclick="switchSettingsTab('security-tab')">
+              <i class="fa-solid fa-shield-halved"></i> Keamanan
+            </button>
+          </div>
+
+          <div class="settings-content">
+            <!-- PROFILE FORM -->
+            <form id="settings-profile-form" class="settings-tab-content active">
+              <div class="input-group">
+                <label for="settings-name"><i class="fa-solid fa-user"></i> Nama Lengkap</label>
+                <input type="text" id="settings-name" required placeholder="Nama Lengkap">
+              </div>
+              <div class="input-group">
+                <label for="settings-phone"><i class="fa-solid fa-phone"></i> Nomor HP</label>
+                <input type="tel" id="settings-phone" placeholder="Nomor HP">
+              </div>
+              <button type="submit" class="btn btn-primary btn-block btn-small">
+                Simpan Profil <i class="fa-solid fa-floppy-disk"></i>
+              </button>
+            </form>
+
+            <!-- SECURITY FORM -->
+            <form id="settings-security-form" class="settings-tab-content">
+              <div class="input-group">
+                <label for="settings-pin"><i class="fa-solid fa-key"></i> PIN Transaksi Baru (6-digit)</label>
+                <input type="password" id="settings-pin" pattern="[0-9]{6}" maxlength="6" placeholder="Masukkan PIN baru">
+                <small class="form-tip">Kosongkan jika tidak ingin mengubah PIN transaksi Anda</small>
+              </div>
+              <div class="input-group">
+                <label for="settings-password"><i class="fa-solid fa-lock"></i> Password Baru</label>
+                <input type="password" id="settings-password" placeholder="Masukkan password baru">
+                <small class="form-tip">Kosongkan jika tidak ingin mengubah password akun</small>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block btn-small">
+                Perbarui Keamanan <i class="fa-solid fa-shield-check"></i>
+              </button>
+            </form>
+        </div>
+
+        <!-- ROLE SPECIFIC ECOSYSTEM PANEL -->
+        <div class="quick-actions" id="role-ecosystem-panel">
+          <h3><i class="fa-solid fa-network-wired text-purple"></i> FITUR EKOSISTEM RP2</h3>
+          <div id="role-panel-content" class="role-panel-content">
+            <!-- Dynamic Role-Based HTML content here -->
+            <p style="font-size: 13px; color: var(--text-muted); text-align: center; padding: 10px;">
+              Silakan masuk untuk memuat panel ekosistem peran Anda.
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT SECTION: MUTASI LEDGER / TRANSACTIONS -->
+      <section class="right-section">
+        <div class="transactions-panel">
+          <div class="panel-header">
+            <h3><i class="fa-solid fa-receipt"></i> Mutasi Rekening</h3>
+            <button class="btn btn-secondary btn-small" id="btn-refresh-tx">
+              <i class="fa-solid fa-rotate"></i> Perbarui
+            </button>
+          </div>
+          
+          <div class="transactions-feed" id="transactions-feed">
+            <!-- Loading state -->
+            <div class="tx-loading">
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              <p>Membaca mutasi saldo dari CentralBank Core...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ================= MODAL: TRANSFER P2P ================= -->
+  <div id="transfer-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-paper-plane text-purple"></i> Kirim Transfer P2P</h2>
+        <button class="btn-close-modal" onclick="closeModal('transfer-modal')">&times;</button>
+      </div>
+      <form id="transfer-form">
+        <div class="input-group">
+          <label for="tx-to"><i class="fa-solid fa-wallet"></i> Wallet ID Penerima</label>
+          <input type="text" id="tx-to" required placeholder="wal_receiver_address">
+          <small class="form-tip">Masukkan Wallet ID target (Contoh dummy: <strong>wal_seller_123</strong>)</small>
+        </div>
+
+        <div class="input-group">
+          <label for="tx-amount"><i class="fa-solid fa-coins"></i> Jumlah CBDC</label>
+          <input type="number" id="tx-amount" min="1" required placeholder="Nominal transfer">
+        </div>
+
+        <!-- Live Fee Estimate Box -->
+        <div class="fee-estimate-box hidden" id="transfer-fee-box">
+          <p class="fee-box-title">ESTIMASI BIAYA & DEBIT AKHIR (floor basis points)</p>
+          <div class="fee-row">
+            <span>Nominal Utama:</span>
+            <span id="est-amount">Rp 0</span>
+          </div>
+          <div class="fee-row">
+            <span>Bank Fee (1%):</span>
+            <span id="est-bank-fee">Rp 0</span>
+          </div>
+          <div class="fee-row">
+            <span>Gateway Fee (0.5%):</span>
+            <span id="est-gateway-fee">Rp 0</span>
+          </div>
+          <div class="fee-row">
+            <span>Pajak Sistem (2%):</span>
+            <span id="est-tax">Rp 0</span>
+          </div>
+          <div class="fee-row total-debit-row">
+            <span>Total Pendebitan Payer:</span>
+            <span id="est-total-debit">Rp 0</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="tx-note"><i class="fa-solid fa-comment-dots"></i> Catatan (Opsional)</label>
+          <input type="text" id="tx-note" placeholder="bayar makan, dsb">
+        </div>
+
+        <div class="input-group">
+          <label for="tx-pin"><i class="fa-solid fa-shield-halved"></i> PIN Transaksi Anda (6-digit)</label>
+          <input type="password" id="tx-pin" pattern="[0-9]{6}" maxlength="6" required placeholder="••••••">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          Konfirmasi & Kirim Dana <i class="fa-solid fa-check"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: BAYAR TAGIHAN ================= -->
+  <div id="pay-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-qrcode text-blue"></i> Pembayaran QR / Invoice</h2>
+        <button class="btn-close-modal" onclick="closeModal('pay-modal')">&times;</button>
+      </div>
+
+      <!-- Developer Quick Invoice Generator -->
+      <div class="dev-invoice-generator">
+        <p><i class="fa-solid fa-wand-magic-sparkles"></i> <strong>Developer Helper Panel:</strong></p>
+        <p class="dev-desc">Gunakan tombol di bawah untuk membuat invoice simulasi tagihan PENDING senilai 5.000 (total tagihan 5.175 setelah Pajak & Fee) agar Anda bisa langsung tes bayar.</p>
+        <button type="button" class="btn btn-secondary btn-block" id="btn-dev-invoice">
+          <i class="fa-solid fa-file-invoice-dollar"></i> Buat Tagihan Simulasi Instan
+        </button>
+      </div>
+
+      <hr class="modal-divider">
+
+      <form id="pay-invoice-form">
+        <div class="input-group">
+          <label for="pay-invoice-id"><i class="fa-solid fa-barcode"></i> ID Payment Request / Invoice</label>
+          <input type="text" id="pay-invoice-id" required placeholder="payreq_dummy_1">
+        </div>
+
+        <div class="input-group">
+          <label for="pay-pin"><i class="fa-solid fa-shield-halved"></i> PIN Transaksi Anda (6-digit)</label>
+          <input type="password" id="pay-pin" pattern="[0-9]{6}" maxlength="6" required placeholder="••••••">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          Selesaikan Pembayaran <i class="fa-solid fa-receipt"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: KREDIT UMKM ================= -->
+  <div id="loan-modal" class="modal-overlay">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-hand-holding-dollar text-success"></i> Fasilitas Kredit Pinjaman UMKM</h2>
+        <button class="btn-close-modal" onclick="closeModal('loan-modal')">&times;</button>
+      </div>
+
+      <div class="modal-body-split">
+        
+        <!-- LEFT: Apply Loan Form -->
+        <div class="modal-split-form">
+          <h3>Ajukan Pinjaman Baru</h3>
+          <p class="section-desc">Bantuan modal usaha UMKM. Limit maks 100.000 dengan suku bunga flat 10%.</p>
+          
+          <form id="loan-apply-form">
+            <div class="input-group">
+              <label for="loan-amount"><i class="fa-solid fa-coins"></i> Nominal Pengajuan (Rp)</label>
+              <input type="number" id="loan-amount" min="1000" max="100000" required placeholder="Max 100.000">
+              <small class="form-tip">Bunga 10% akan dihitung otomatis saat disetujui.</small>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">
+              Ajukan Kredit Modal <i class="fa-solid fa-arrow-right-long"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- RIGHT: Active Loans List & Repayment -->
+        <div class="modal-split-data">
+          <h3>Pinjaman Aktif Terutang</h3>
+          
+          <div class="loans-container" id="loans-feed">
+            <p class="no-loans">Tidak ada pinjaman terutang saat ini.</p>
+          </div>
+
+          <div class="repay-section hidden" id="loan-repay-section">
+            <hr class="modal-divider">
+            <h3>Bayar Cicilan Kredit</h3>
+            <form id="loan-repay-form">
+              <input type="hidden" id="repay-loan-id">
+              
+              <div class="input-row">
+                <div class="input-group">
+                  <label for="repay-amount">Nominal Cicilan (Rp)</label>
+                  <input type="number" id="repay-amount" min="100" required placeholder="Bayar cicilan">
+                </div>
+                <button type="submit" class="btn btn-success align-self-end">
+                  Bayar <i class="fa-solid fa-check"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: TOP UP SALDO ================= -->
+  <div id="topup-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-circle-plus text-purple"></i> Top Up Saldo</h2>
+        <button class="btn-close-modal" onclick="closeModal('topup-modal')">&times;</button>
+      </div>
+      <form id="topup-form">
+        <div class="input-group">
+          <label for="topup-amount"><i class="fa-solid fa-coins"></i> Nominal Top Up (Rp)</label>
+          <input type="number" id="topup-amount" min="1000" max="1000000" required placeholder="Masukkan nominal top up">
+          <small class="form-tip">Simulasi penambahan saldo dari cadangan dana Bank Sentral.</small>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+          Selesaikan Top Up <i class="fa-solid fa-check"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: TARIK TUNAI ================= -->
+  <div id="withdraw-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-circle-minus text-blue"></i> Tarik Tunai</h2>
+        <button class="btn-close-modal" onclick="closeModal('withdraw-modal')">&times;</button>
+      </div>
+      <form id="withdraw-form">
+        <div class="input-group">
+          <label for="withdraw-amount"><i class="fa-solid fa-coins"></i> Nominal Penarikan (Rp)</label>
+          <input type="number" id="withdraw-amount" min="1000" required placeholder="Masukkan nominal penarikan">
+          <small class="form-tip">Simulasi penarikan saldo digital menjadi cash. Saldo Anda akan berkurang.</small>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+          Selesaikan Penarikan <i class="fa-solid fa-check"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Local Script -->
+  <script src="app.js"></script>
+</body>
+</html>

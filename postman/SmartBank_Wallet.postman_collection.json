@@ -1,0 +1,446 @@
+{
+	"info": {
+		"_postman_id": "c62fb91e-36bb-49e0-8a8b-1e24bc109f3e",
+		"name": "SmartBank Wallet API",
+		"description": "Koleksi Postman lengkap untuk menguji backend e-wallet retail Tier-2 SmartBank Wallet yang terintegrasi dengan CentralBank Core (atau Simulation Engine). Memvalidasi token JWT, validasi PIN, idempotensi, limit harian, cooldown, dan pinjaman UMKM.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Auth & Registrasi",
+			"item": [
+				{
+					"name": "Register Akun",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Yonaldi Ernanda\",\n  \"email\": \"yonaldi@example.com\",\n  \"phone\": \"08123456789\",\n  \"password\": \"rahasia123\",\n  \"pin\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Mendaftarkan pengguna retail baru di database lokal Wallet dan secara sinkron memanggil CentralBank Core untuk membuat wallet account dengan saldo awal 50.000."
+					},
+					"response": []
+				},
+				{
+					"name": "Login Akun",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"if (responseJson.success && responseJson.data.accessToken) {",
+									"    pm.collectionVariables.set(\"accessToken\", responseJson.data.accessToken);",
+									"    pm.collectionVariables.set(\"walletId\", responseJson.data.user.walletId);",
+									"    console.log(\"✅ Access Token & Wallet ID berhasil disimpan ke Collection Variables!\");",
+									"}"
+								],
+								"type": "javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"yonaldi@example.com\",\n  \"password\": \"rahasia123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Mengotentikasi kredensial pengguna, mengambil Wallet ID terkait, dan menghasilkan Access Token JWT jangka pendek dan Refresh Token."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Data Wallet",
+			"item": [
+				{
+					"name": "Ambil Saldo & Limit",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/wallets/me/balance",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"wallets",
+								"me",
+								"balance"
+							]
+						},
+						"description": "Mengambil saldo CBDC terbaru, holds, dan batas transaksi harian langsung dari CentralBank Core (Single Source of Truth)."
+					},
+					"response": []
+				},
+				{
+					"name": "Ambil Riwayat Transaksi",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/wallets/me/transactions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"wallets",
+								"me",
+								"transactions"
+							]
+						},
+						"description": "Membaca catatan mutasi double-entry ledger yang settled milik user bersangkutan dari CentralBank Core dengan nama penerima disamarkan (masked) demi privasi."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Transaksi Finansial",
+			"item": [
+				{
+					"name": "Transfer P2P",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "idempotency-transfer-test-unique-key-01",
+								"type": "text"
+							},
+							{
+								"key": "X-Wallet-PIN",
+								"value": "123456",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"to_wallet_id\": \"wal_seller_123\",\n  \"amount\": 10000,\n  \"note\": \"Bayar beli makanan UMKM\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transfers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transfers"
+							]
+						},
+						"description": "Mengirim instruksi transfer P2P ke wallet penerima. Wajib memverifikasi PIN transaksi, validasi limit harian, cooldown 10 detik, dan header Idempotency-Key. \n\n*Silakan coba kirim request ini 2x dengan key yang sama untuk melihat proteksi IDEMPOTENCY_CONFLICT.*\n*Silakan coba kirim cepat berturut-turut untuk melihat COOLDOWN_ACTIVE.*"
+					},
+					"response": []
+				},
+				{
+					"name": "Buat Invoice Simulasi (Test Helper)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"if (responseJson.success && responseJson.data.invoice.id) {",
+									"    pm.collectionVariables.set(\"invoiceId\", responseJson.data.invoice.id);",
+									"    console.log(\"✅ Invoice ID berhasil disimpan ke Collection Variables: \" + responseJson.data.invoice.id);",
+									"}"
+								],
+								"type": "javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/wallets/me/invoice/generate-test",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"wallets",
+								"me",
+								"invoice",
+								"generate-test"
+							]
+						},
+						"description": "Rute pembantu (utility developer) untuk membuat sebuah invoice order simulasi pending senilai 10.000 (total ditagih 10.350 setelah fees) agar Anda dapat menguji proses pembayaran invoice/QR."
+					},
+					"response": []
+				},
+				{
+					"name": "Bayar Tagihan / Invoice",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "idempotency-payreq-unique-key-99",
+								"type": "text"
+							},
+							{
+								"key": "X-Wallet-PIN",
+								"value": "123456",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/payment-requests/{{invoiceId}}/pay",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"payment-requests",
+								"{{invoiceId}}",
+								"pay"
+							]
+						},
+						"description": "Menyelesaikan pembayaran invoice/QR payment request yang berstatus PENDING di CentralBank Core. Memerlukan otentikasi JWT, PIN transaksi, dan Idempotency-Key."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Kredit / Pinjaman UMKM",
+			"item": [
+				{
+					"name": "Ajukan Pinjaman UMKM",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"if (responseJson.success && responseJson.data.loan.id) {",
+									"    pm.collectionVariables.set(\"loanId\", responseJson.data.loan.id);",
+									"    console.log(\"✅ Loan ID berhasil disimpan ke Collection Variables: \" + responseJson.data.loan.id);",
+									"}"
+								],
+								"type": "javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "idempotency-loan-apply-key-01",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 30000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/loans/apply",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"loans",
+								"apply"
+							]
+						},
+						"description": "Mengajukan pinjaman modal UMKM ke CentralBank Core (Limit maks 100.000). Jika disetujui, dana langsung dikreditkan ke saldo wallet pembawa, dan dicatat bunga 10% (total tagihan terutang 33.000)."
+					},
+					"response": []
+				},
+				{
+					"name": "Bayar Cicilan Pinjaman",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "idempotency-loan-repay-key-01",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 20000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/loans/{{loanId}}/repay",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"loans",
+								"{{loanId}}",
+								"repay"
+							]
+						},
+						"description": "Membayar cicilan/melunasi outstanding pinjaman UMKM aktif menggunakan saldo wallet Anda."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "walletId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "invoiceId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "loanId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
